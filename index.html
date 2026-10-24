@@ -306,7 +306,7 @@ tr(document.body);obs.observe(document.body,{childList:true,subtree:true,charact
 var photo="",email="";
 function paintAv(){var a=document.getElementById("av");if(!uid){a.style.display="none";return}a.style.display="block";if(photo){a.style.backgroundImage="url("+photo+")";a.textContent=""}else{a.style.backgroundImage="none";a.textContent=(email||"?").charAt(0).toUpperCase()}}
 document.getElementById("av").onclick=openSet;DICT["Baraka AI n’est pas encore disponible dans cette version."]=["Baraka AI is not available in this version yet.","Baraka AI aún no está disponible en esta versión."];DICT["Changer la photo"]=["Change photo","Cambiar foto"];
-var SB_URL="COLLE_ICI_TON_URL_SUPABASE",SB_KEY="COLLE_ICI_TA_CLE_ANON",sb=null,uid=null,cT;
+var SB_URL="https://mwihvblrtbgpqzyrsbff.supabase.co",SB_KEY="sb_publishable_cpXmblRETDqon5ttMVUomQ_pSliQyYv",sb=null,uid=null,cT;
 DICT["Se déconnecter"]=["Log out","Cerrar sesión"];DICT["Se connecter"]=["Log in","Iniciar sesión"];DICT["Créer un compte"]=["Create an account","Crear una cuenta"];DICT["Adresse e-mail"]=["Email address","Correo electrónico"];DICT["Mot de passe"]=["Password","Contraseña"];
 function amsg(t){document.getElementById("am").textContent=t}
 function showAuth(){document.getElementById("auth").style.display="flex"}
@@ -314,6 +314,7 @@ function cloudSave(){if(!sb||!uid)return;clearTimeout(cT);cT=setTimeout(function
 function onIn(u){uid=u.id;email=u.email||"";paintAv();document.getElementById("auth").style.display="none";sb.from("kooma_data").select("data").eq("user_id",uid).maybeSingle().then(function(r){var d=r.data&&r.data.data;if(d&&(d.tx||d.rv)){tx=d.tx||[];rv=d.rv||[];photo=d.photo||"";chal=d.chal||{save:[]};stk=d.stk||stk;paintAv();try{localStorage.setItem(KEY,JSON.stringify(tx));localStorage.setItem("kooma-avis",JSON.stringify(rv))}catch(e){}render()}else cloudSave()})}
 function cred(){return{email:document.getElementById("ae").value.trim(),password:document.getElementById("ap").value}}
 function fail(e){amsg(/Invalid login/i.test(e.message)?"E-mail ou mot de passe incorrect.":e.message)}
+if(!window.supabase||SB_URL.indexOf("COLLE")>=0){showAuth();amsg("Connexion au serveur impossible. Vérifie ta connexion internet et recharge la page.")}
 if(window.supabase&&SB_URL.indexOf("COLLE")<0){
 sb=supabase.createClient(SB_URL,SB_KEY);
 document.getElementById("a1").onclick=function(){amsg("…");sb.auth.signInWithPassword(cred()).then(function(r){if(r.error)fail(r.error);else onIn(r.data.user)})};
