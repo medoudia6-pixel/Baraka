@@ -308,17 +308,17 @@ function paintAv(){var a=document.getElementById("av");if(!uid){a.style.display=
 document.getElementById("av").onclick=openSet;DICT["Baraka AI n’est pas encore disponible dans cette version."]=["Baraka AI is not available in this version yet.","Baraka AI aún no está disponible en esta versión."];DICT["Changer la photo"]=["Change photo","Cambiar foto"];
 var SB_URL="https://mwihvblrtbgpqzyrsbff.supabase.co",SB_KEY="sb_publishable_cpXmblRETDqon5ttMVUomQ_pSliQyYv",sb=null,uid=null,cT;
 DICT["Se déconnecter"]=["Log out","Cerrar sesión"];DICT["Se connecter"]=["Log in","Iniciar sesión"];DICT["Créer un compte"]=["Create an account","Crear una cuenta"];DICT["Adresse e-mail"]=["Email address","Correo electrónico"];DICT["Mot de passe"]=["Password","Contraseña"];
-function amsg(t){document.getElementById("am").textContent=t}
+function amsg(t,g){var m=document.getElementById("am");m.textContent=t;m.style.color=g?"#86efac":"";m.style.fontWeight=g?"600":"";m.style.fontSize=g?"15px":""}
 function showAuth(){document.getElementById("auth").style.display="flex"}
 function cloudSave(){if(!sb||!uid)return;clearTimeout(cT);cT=setTimeout(function(){sb.from("kooma_data").upsert({user_id:uid,data:{tx:tx,rv:rv,photo:photo,chal:chal,stk:stk},updated_at:new Date().toISOString()}).then(function(r){if(r.error)console.error(r.error)})},800)}
 function onIn(u){uid=u.id;email=u.email||"";paintAv();document.getElementById("auth").style.display="none";sb.from("kooma_data").select("data").eq("user_id",uid).maybeSingle().then(function(r){var d=r.data&&r.data.data;if(d&&(d.tx||d.rv)){tx=d.tx||[];rv=d.rv||[];photo=d.photo||"";chal=d.chal||{save:[]};stk=d.stk||stk;paintAv();try{localStorage.setItem(KEY,JSON.stringify(tx));localStorage.setItem("kooma-avis",JSON.stringify(rv))}catch(e){}render()}else cloudSave()})}
 function cred(){return{email:document.getElementById("ae").value.trim(),password:document.getElementById("ap").value}}
-function fail(e){amsg(/Invalid login/i.test(e.message)?"E-mail ou mot de passe incorrect.":e.message)}
+function fail(e){var m=e.message||"";amsg(/Invalid login/i.test(m)?"E-mail ou mot de passe incorrect.":/not confirmed/i.test(m)?"Confirme d’abord ton e-mail : ouvre le message reçu et touche le lien.":/rate limit|too many/i.test(m)?"Trop de demandes. Attends quelques minutes puis réessaie.":m)}
 if(!window.supabase||SB_URL.indexOf("COLLE")>=0){showAuth();amsg("Connexion au serveur impossible. Vérifie ta connexion internet et recharge la page.")}
 if(window.supabase&&SB_URL.indexOf("COLLE")<0){
 sb=supabase.createClient(SB_URL,SB_KEY);
 document.getElementById("a1").onclick=function(){amsg("…");sb.auth.signInWithPassword(cred()).then(function(r){if(r.error)fail(r.error);else onIn(r.data.user)})};
-document.getElementById("a2").onclick=function(){amsg("…");sb.auth.signUp(cred()).then(function(r){if(r.error)fail(r.error);else if(r.data.session)onIn(r.data.user);else amsg("Compte créé. Vérifie ton e-mail pour confirmer, puis connecte-toi.")})};
+document.getElementById("a2").onclick=function(){var b=this,c=cred();if(!c.email||c.password.length<6){amsg("Entre ton e-mail et un mot de passe d’au moins 6 caractères.");return}b.disabled=true;amsg("…");sb.auth.signUp({email:c.email,password:c.password,options:{emailRedirectTo:location.origin+location.pathname}}).then(function(r){if(r.error){b.disabled=false;fail(r.error)}else if(r.data.session)onIn(r.data.user);else{amsg("✅ Compte créé ! Un e-mail de confirmation vient d’être envoyé à "+c.email+". Ouvre ta boîte mail (regarde aussi les spams), touche le lien, puis reviens ici pour te connecter.",true);setTimeout(function(){b.disabled=false},30000)}},function(){b.disabled=false;amsg("Connexion au serveur impossible. Réessaie.")})};
 sb.auth.getSession().then(function(r){if(r.data.session)onIn(r.data.session.user);else showAuth()});
 }
 
